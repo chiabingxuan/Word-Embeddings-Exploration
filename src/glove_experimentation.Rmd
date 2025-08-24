@@ -2,7 +2,9 @@
 title: "GloVe Experimentation"
 author: "Chia Bing Xuan"
 date: "2025-08-21"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Imports
 
-```{r}
+```{r, eval=FALSE}
 library(dplyr)
 library(ggplot2)
 library(lsa)
@@ -23,7 +25,7 @@ library(text2vec)
 
 ## Setup
 
-```{r}
+```{r, eval=FALSE}
 pickle <- import("pickle")
 py_builtin <- import_builtins()
 set.seed(42)
@@ -33,7 +35,7 @@ set.seed(42)
 
 ### Main Function
 
-```{r}
+```{r, eval=FALSE}
 # Main GloVe function
 conduct_glove <- function(reviews_train, vector_size, window, negative, min_count, epochs) {
   # Create an iterator over the tokens
@@ -62,7 +64,7 @@ conduct_glove <- function(reviews_train, vector_size, window, negative, min_coun
 ```
 
 ### Visualisation
-```{r}
+```{r, eval=FALSE}
 # Function to make PCA plot
 visualise_embeddings <- function(word_vectors, filename) {
   # Perform PCA to reduce dimensions to 2D
@@ -85,7 +87,7 @@ visualise_embeddings <- function(word_vectors, filename) {
 
 ### Nearest Neighbours Analysis
 
-```{r}
+```{r, eval=FALSE}
 # Nearest neighbours analysis
 find_nearest_neighbours <- function(embeddings, word, topn) {
   if (!(word %in% rownames(embeddings))) {
@@ -100,7 +102,7 @@ find_nearest_neighbours <- function(embeddings, word, topn) {
 
 ### WordSim-353 with Spearman Coefficient (For Hyperparameter Tuning)
 
-```{r}
+```{r, eval=FALSE}
 # Load WordSim-353 dataset
 load_wordsim353 <- function(path = "../data/wordsim353crowd.csv") {
   wordsim_data <- read_csv(path, show_col_types = FALSE)
@@ -165,7 +167,7 @@ eval_wordsim353 <- function(is_in_vocab, get_vector, wordsim_scores) {
 
 ## Load Processed Data
 
-```{r}
+```{r, eval=FALSE}
 load_data <- function() {
   with(py_builtin$open("../data/reviews_train.pkl", "rb") %as% f, {
     reviews_train_py <- pickle$load(f)
@@ -182,19 +184,19 @@ load_data <- function() {
 }
 ```
 
-```{r}
+```{r, eval=FALSE}
 loaded_data <- load_data()
 reviews_train <- loaded_data$reviews_train
 most_common_words <- loaded_data$most_common_words
 ```
 
-```{r}
+```{r, eval=FALSE}
 most_common_words
 TEST_WORDS <- c("film", "like", "good", "time", "story", "character", "life", "scene")
 ```
 
 ## Setting General Configs
-```{r}
+```{r, eval=FALSE}
 GLOVE_MIN_COUNT <- 1
 GLOVE_EPOCHS <- 20
 ```
@@ -202,13 +204,13 @@ GLOVE_EPOCHS <- 20
 ## Fixed Set of Parameters
 ### Algorithm
 
-```{r}
+```{r, eval=FALSE}
 GLOVE_VECTOR_SIZE <- 50
 GLOVE_WINDOW <- 3
 GLOVE_NEGATIVE <- 5
 ```
 
-```{r}
+```{r, eval=FALSE}
 # Fit model
 glove_embeddings <- conduct_glove(reviews_train = reviews_train, vector_size = GLOVE_VECTOR_SIZE, window = GLOVE_WINDOW, negative = GLOVE_NEGATIVE, min_count = GLOVE_MIN_COUNT, epochs = GLOVE_EPOCHS)
 
@@ -218,14 +220,14 @@ saveRDS(glove_embeddings, file = "../embedding_outputs/glove_embeddings.rds")
 
 ### Visualisation
 
-```{r}
+```{r, eval=FALSE}
 most_common_glove_embeddings <- glove_embeddings[most_common_words,]
 visualise_embeddings(word_vectors = most_common_glove_embeddings, filename = "glove_pca_visualisation")
 ```
 
 ### Nearest Neighbours
 
-```{r}
+```{r, eval=FALSE}
 GLOVE_TOPN <- 10
 for (word in TEST_WORDS) {
   cat(GLOVE_TOPN, " nearest neighbours to ", word, ":\n", sep="")
@@ -237,13 +239,13 @@ for (word in TEST_WORDS) {
 ## Trying out Hyperparameter Tuning
 ### Algorithm
 
-```{r}
+```{r, eval=FALSE}
 GLOVE_VECTOR_SIZES <- c(50, 100, 150)
 GLOVE_WINDOWS <- c(3, 5, 10)
 GLOVE_NEGATIVES <- c(3, 5, 10)
 ```
 
-```{r}
+```{r, eval=FALSE}
 glove_max_spearman_coeff <- -10
 glove_best_vector_size <- NA
 glove_best_window <- NA
@@ -282,21 +284,21 @@ for (vector_size in GLOVE_VECTOR_SIZES) {
 cat(sprintf("Max Spearman coefficient: %.4f | Best vector size: %d | Best window: %d | Best negative: %d\n", glove_max_spearman_coeff, glove_best_vector_size, glove_best_window, glove_best_negative))
 ```
 
-```{r}
+```{r, eval=FALSE}
 # Load best embeddings
 glove_embeddings_ht <- readRDS(file = "../embedding_outputs/glove_embeddings_ht.rds")
 ```
 
 ### Visualisation
 
-```{r}
+```{r, eval=FALSE}
 most_common_glove_embeddings_ht <- glove_embeddings_ht[most_common_words,]
 visualise_embeddings(word_vectors = most_common_glove_embeddings_ht, filename = "glove_ht_pca_visualisation")
 ```
 
 ### Nearest Neighbours
 
-```{r}
+```{r, eval=FALSE}
 GLOVE_TOPN <- 10
 for (word in TEST_WORDS) {
   cat(GLOVE_TOPN, " nearest neighbours to ", word, ":\n", sep="")

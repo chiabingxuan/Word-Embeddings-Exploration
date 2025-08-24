@@ -4,9 +4,8 @@
 *.RData
 *.Rhistory
 
-# Ignore all data . and Word documents
+# Ignore all data
 **/data/
-*.docx
 *.pkl
 *.rds
 *.tmp

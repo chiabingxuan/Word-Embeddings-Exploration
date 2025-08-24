@@ -1,0 +1,14 @@
+# Ignore cached files
+**/__pycache__/
+**/.ipynb_checkpoints/
+*.RData
+*.Rhistory
+
+# Ignore all data, .tmp files, .pkl files and Word documents
+**/data/
+*.docx
+*.pkl
+*.tmp
+
+# Ignore venv
+venv/
